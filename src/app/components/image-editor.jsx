@@ -1,9 +1,9 @@
 "use client";
 import axios from "axios";
 import React, { useState, useRef } from "react";
-import Modal from "react-modal";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { storage } from "../firebase";
+// import Modal from "react-modal";
+// import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+// import { storage } from "../firebase";
 const ImageEditor = () => {
   const [imageFile, setImageFile] = useState(null);
   const [secondImg, setSecondImg] = useState(null);
@@ -44,13 +44,16 @@ const ImageEditor = () => {
     // Access the selected file from the event
     const selectedFile = event.target.files[0];
     setImageFile(selectedFile);
-  };
+ 
+      
+   }     
 
   const handlePrompt = () => {
     if (!imageFile) {
       setImageError("Please upload an image");
     } else {
       setIsPrompt(true);
+      setImageError("")
     }
   };
 
@@ -79,40 +82,14 @@ const ImageEditor = () => {
     }
   };
 
-  const uploadImage = async (image) => {
-    const storageRef = ref(storage, `images/${Date.now()}`);
-    const uploadTask = uploadBytesResumable(storageRef, image);
-
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          // Handle progress if needed
-        },
-        (error) => {
-          reject(error); // Handle errors
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref)
-            .then((downloadURL) => {
-              // URL of the uploaded image
-              console.log("Image URL:", downloadURL);
-              resolve(downloadURL);
-            })
-            .catch((error) => {
-              reject(error); // Handle errors
-            });
-        }
-      );
-    });
-  };
+ 
   const handleGenerateImge = async () => {
     const seed = ["55994449", "117879368", "48672244", "117879368"];
 
     try {
       const formData = new FormData();
       formData.append("file", imageFile);
-      const response = axios.post(
+      const response = await axios.post(
         "https://asmrdb.hybridmediaworks.com/api/upload-image",
         formData,
         {
@@ -122,12 +99,12 @@ const ImageEditor = () => {
         }
       );
       console.log("response.data ", response.data);
-      // if (imageUrl) {
-      //   const dataUrls = await Promise.all(seed.map(s => uploadFunction(imageUrl,s)));
-      //   console.log("Responses:", dataUrls);
-      //  // setResponseImage(dataUrls);
-      //   setIsPrompt(false);
-      // }
+      if (response.data?.link) {
+        const dataUrls = await Promise.all(seed.map(s => uploadFunction(response.data?.link,s)));
+        console.log("Responses:", dataUrls);
+       setResponseImage(dataUrls);
+        setIsPrompt(false);
+      }
     } catch (error) {
       console.error("Error in handleGenerateImge:", error);
     }
@@ -217,8 +194,8 @@ const ImageEditor = () => {
           />
         </div>
       </div>
-      <div className="w-full h-full">
-        <div className="flex justify-center w-full h-full py-8">
+      <div className="w-full h-full flex flex-col">
+        <div className="flex justify-center  flex-col items-center w-full h-full py-8">
           {!imageFile ? (
             <div className="bg-[#F2F3F7] w-[900px] h-[350px]  flex justify-center items-center rounded-3xl">
               <div className="w-[800px] h-[250px] border-dashed border-2 border-gray-500 rounded-2xl flex flex-col items-center justify-center">
@@ -249,17 +226,17 @@ const ImageEditor = () => {
                     X
                   </span>
                 </div>
-                <div className="flex flex-col gap-y-2">
+                <div className="flex flex-col gap-y-2 w-[800px] h-[400px]">
                   <div className="w-full h-full flex justify-center">
                     <img src={URL.createObjectURL(imageFile)} alt="" />
                   </div>
                   {imageError && <p>{imageError}</p>}
                   {responseImage && (
-                    <div className="flex items-center gap-x-2 my-5">
+                    <div className="flex items-center gap-x-2 my-5 justify-center">
                       {responseImage.map((item) => (
                         <img
                           src={URL.createObjectURL(item)}
-                          className="w-[200px] h-[200px]"
+                          className="w-[150px] h-[150px] rounded-lg"
                         />
                       ))}
                     </div>
@@ -268,9 +245,24 @@ const ImageEditor = () => {
               </div>
             </div>
           )}
+                  {isPrompt && (
+            <div className="flex justify-center mt-10">
+              <div className="flex p-2 w-[500px] bg-[#F2F3F7] rounded-lg px-2">
+                <input
+                  type="text"
+                  className="outline-none w-full px-2 bg-[#F2F3F7] "
+                  placeholder="Enter prompt..."
+                  onChange={(e)=>setPrompt(e.target.value)}
+                />
+                <button className="bg-blue-500 text-white p-2.5 rounded-lg" onClick={handleGenerateImge}>
+                  Generate
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      <div className="w-[200px] h-[200px]">
+      {/* <div className="w-[200px] h-[200px]">
         {isPrompt && (
           <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex rounded-lg">
             <div className="relative p-8 bg-white w-200 h-200 m-auto">
@@ -306,9 +298,9 @@ const ImageEditor = () => {
             </div>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
 
-export default ImageEditor;
+export default ImageEditor
