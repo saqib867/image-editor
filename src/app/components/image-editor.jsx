@@ -2,8 +2,8 @@
 import axios from "axios";
 import React, { useState, useRef } from "react";
 import Modal from "react-modal";
-import { getDownloadURL, ref, uploadBytesResumable, } from 'firebase/storage';
-import {storage} from '../firebase'
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { storage } from "../firebase";
 const ImageEditor = () => {
   const [imageFile, setImageFile] = useState(null);
   const [secondImg, setSecondImg] = useState(null);
@@ -56,74 +56,82 @@ const ImageEditor = () => {
 
   const xApiKey = "b84e8750806d78328297224457ff2bff244c44cf";
 
+  const uploadFunction = async (img, seed) => {
+    console.log("seed ", img);
+    try {
+      const response = await axios.get(
+        `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${img}&background.prompt=${prompt}&removeBackground=true&background.seed=${seed}`,
 
-  
+        {
+          headers: {
+            Accept: "image/*",
+            "x-api-key": xApiKey,
+          },
+          responseType: "blob",
+          maxRedirects: 5,
+        }
+      );
 
-const uploadFunction =async(img,seed)=>{
-
-  console.log("seed ",img)
-  try {
-    const response = await axios.get(
-      `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${img}&background.prompt=${prompt}&removeBackground=true&background.seed=${seed}`,
-        
-      {
-        headers: {
-         
-          Accept: "image/*",
-          "x-api-key": xApiKey,
-        },
-        responseType:'blob'
-      }
-    );
-   
-    // setResponseImage(dataUrl)
-    return response.data
-   
-  } catch (error) {
-    console.log("response.error ", error);
-  }
-}
-    
-         
-const uploadImage = async (image) => {
-  const storageRef = ref(storage, `images/${Date.now()}`);
-  const uploadTask = uploadBytesResumable(storageRef, image);
-
-  return new Promise((resolve, reject) => {
-    uploadTask.on('state_changed', (snapshot) => {
-      // Handle progress if needed
-    }, (error) => {
-      reject(error); // Handle errors
-    }, () => {
-      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-        // URL of the uploaded image
-        console.log('Image URL:', downloadURL);
-        resolve(downloadURL);
-      }).catch((error) => {
-        reject(error); // Handle errors
-      });
-    });
-  });
-};
-const handleGenerateImge = async () => {
-  const seed = [
-    "55994449", "117879368", "48672244", "117879368"
-  ];
-
-  try {
-    const imageUrl = await uploadImage(imageFile);
-    console.log("image url ",imageUrl)
-    if (imageUrl) {
-      const dataUrls = await Promise.all(seed.map(s => uploadFunction(imageUrl,s)));
-      console.log("Responses:", dataUrls);
-     // setResponseImage(dataUrls);
-      setIsPrompt(false);
+      // setResponseImage(dataUrl)
+      return response.data;
+    } catch (error) {
+      console.log("response.error ", error);
     }
-  } catch (error) {
-    console.error("Error in handleGenerateImge:", error);
-  }
-};
-  
+  };
+
+  const uploadImage = async (image) => {
+    const storageRef = ref(storage, `images/${Date.now()}`);
+    const uploadTask = uploadBytesResumable(storageRef, image);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // Handle progress if needed
+        },
+        (error) => {
+          reject(error); // Handle errors
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((downloadURL) => {
+              // URL of the uploaded image
+              console.log("Image URL:", downloadURL);
+              resolve(downloadURL);
+            })
+            .catch((error) => {
+              reject(error); // Handle errors
+            });
+        }
+      );
+    });
+  };
+  const handleGenerateImge = async () => {
+    const seed = ["55994449", "117879368", "48672244", "117879368"];
+
+    try {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      const response = axios.post(
+        "https://asmrdb.hybridmediaworks.com/api/upload-image",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // do not forget this
+          },
+        }
+      );
+      console.log("response.data ", response.data);
+      // if (imageUrl) {
+      //   const dataUrls = await Promise.all(seed.map(s => uploadFunction(imageUrl,s)));
+      //   console.log("Responses:", dataUrls);
+      //  // setResponseImage(dataUrls);
+      //   setIsPrompt(false);
+      // }
+    } catch (error) {
+      console.error("Error in handleGenerateImge:", error);
+    }
+  };
 
   console.log("response.image ", responseImage);
 
@@ -207,9 +215,7 @@ const handleGenerateImge = async () => {
             ref={secondImage}
             onChange={handleSecondImgChange}
           />
-          
         </div>
-        
       </div>
       <div className="w-full h-full">
         <div className="flex justify-center w-full h-full py-8">
@@ -231,9 +237,7 @@ const handleGenerateImge = async () => {
                   + Select a photo
                 </button>
               </div>
-              
             </div>
-            
           ) : (
             <div>
               <div className="w-[800px] h-[400px]">
@@ -247,24 +251,24 @@ const handleGenerateImge = async () => {
                 </div>
                 <div className="flex flex-col gap-y-2">
                   <div className="w-full h-full flex justify-center">
-                  <img src={URL.createObjectURL(imageFile)} alt="" />
+                    <img src={URL.createObjectURL(imageFile)} alt="" />
+                  </div>
+                  {imageError && <p>{imageError}</p>}
+                  {responseImage && (
+                    <div className="flex items-center gap-x-2 my-5">
+                      {responseImage.map((item) => (
+                        <img
+                          src={URL.createObjectURL(item)}
+                          className="w-[200px] h-[200px]"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {imageError && <p>{imageError}</p>}
-                {responseImage && 
-                <div className="flex items-center gap-x-2 my-5">
-                  {responseImage.map(item=>(
-                    <img src={URL.createObjectURL(item)} className="w-[200px] h-[200px]" />
-                  ))}
-                  
-                  </div>}
-                </div>
-                
               </div>
             </div>
           )}
-              
         </div>
-        
       </div>
       <div className="w-[200px] h-[200px]">
         {isPrompt && (
