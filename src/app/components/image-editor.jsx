@@ -1,16 +1,16 @@
 "use client";
 import React, { useState, useRef } from "react";
-import Modal from 'react-modal';
+import Modal from "react-modal";
 const ImageEditor = () => {
   const [imageFile, setImageFile] = useState(null);
   const [secondImg, setSecondImg] = useState(null);
-const [isPrompt,setIsPrompt]=useState(false)
-const [prompt, setPrompt] = useState(false);
+  const [isPrompt, setIsPrompt] = useState(false);
+  const [prompt, setPrompt] = useState(false);
   const fileInputRef = useRef(null);
   const secondImage = useRef(null);
-const generatePrompt=()=>{
-    setIsPrompt(false)
-}
+  const generatePrompt = () => {
+    setIsPrompt(false);
+  };
   const closeModal = () => {
     setIsPrompt(false);
   };
@@ -79,7 +79,10 @@ const generatePrompt=()=>{
               Remove Background
             </span>
           </div>
-          <div className="flex justify-center flex-col items-center mt-4 cursor-pointer" onClick={()=>setIsPrompt(!isPrompt)}>
+          <div
+            className="flex justify-center flex-col items-center mt-4 cursor-pointer"
+            onClick={() => setIsPrompt(!isPrompt)}
+          >
             <span className="flex w-24 h-16 bg-[#F2F3F7]  rounded-lg  justify-center items-center">
               <svg
                 viewBox="0 0 24 24"
@@ -100,8 +103,11 @@ const generatePrompt=()=>{
             </span>
             <span className="w-24 text-sm text-center mt-2">Prompt</span>
           </div>
-      
-          <div className="flex justify-center flex-col items-center mt-4 cursor-pointer" onClick={handleSecondImg}>
+
+          <div
+            className="flex justify-center flex-col items-center mt-4 cursor-pointer"
+            onClick={handleSecondImg}
+          >
             <span className="flex w-24 h-16 bg-[#F2F3F7]  rounded-lg  justify-center items-center">
               <svg
                 viewBox="0 0 24 24"
@@ -122,16 +128,16 @@ const generatePrompt=()=>{
             </span>
           </div>
           <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  ref={secondImage}
-                  onChange={handleSecondImgChange}
-                />
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            ref={secondImage}
+            onChange={handleSecondImgChange}
+          />
         </div>
       </div>
-      <div className="w-full h-full">
-        <div className="flex justify-center w-full h-full py-8">
+      <div className="w-full h-full flex flex-col">
+        <div className="flex justify-center flex-col items-center w-full h-full py-8">
           {!imageFile ? (
             <div className="bg-[#F2F3F7] w-[900px] h-[350px]  flex justify-center items-center rounded-3xl">
               <div className="w-[800px] h-[250px] border-dashed border-2 border-gray-500 rounded-2xl flex flex-col items-center justify-center">
@@ -165,14 +171,27 @@ const generatePrompt=()=>{
                 <div className="w-full h-full flex justify-center">
                   <img src={imageFile} alt="" />
                 </div>
-             
+              </div>
+            </div>
+          )}
+          {isPrompt && (
+            <div className="flex justify-center mt-10">
+              <div className="flex p-2 w-[500px] bg-[#F2F3F7] rounded-lg px-2">
+                <input
+                  type="text"
+                  className="outline-none w-full px-2 bg-[#F2F3F7] "
+                  placeholder="Enter prompt..."
+                />
+                <button className="bg-blue-500 text-white p-2.5 rounded-lg" onClick={generatePrompt}>
+                  Generate
+                </button>
               </div>
             </div>
           )}
         </div>
       </div>
-      <div className="w-[200px] h-[200px]">
-      {isPrompt && (
+      <div className="">
+        {/* {isPrompt && (
         <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex rounded-lg">
             
           <div className="relative p-8 bg-white w-200 h-200 m-auto">
@@ -201,10 +220,8 @@ const generatePrompt=()=>{
           
           </div>
         </div>
-      )}
-   
+      )} */}
       </div>
-     
     </div>
   );
 };
