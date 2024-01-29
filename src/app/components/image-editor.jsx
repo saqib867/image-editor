@@ -1,16 +1,19 @@
 "use client";
+import axios from "axios";
 import React, { useState, useRef } from "react";
 import Modal from "react-modal";
+import { getDownloadURL, ref, uploadBytesResumable, } from 'firebase/storage';
+import {storage} from '../firebase'
 const ImageEditor = () => {
   const [imageFile, setImageFile] = useState(null);
   const [secondImg, setSecondImg] = useState(null);
+  const [imageError, setImageError] = useState(null);
+  const [responseImage, setResponseImage] = useState([]);
   const [isPrompt, setIsPrompt] = useState(false);
-  const [prompt, setPrompt] = useState(false);
+  const [prompt, setPrompt] = useState("");
   const fileInputRef = useRef(null);
   const secondImage = useRef(null);
-  const generatePrompt = () => {
-    setIsPrompt(false);
-  };
+
   const closeModal = () => {
     setIsPrompt(false);
   };
@@ -35,24 +38,113 @@ const ImageEditor = () => {
       };
       reader.readAsDataURL(selectedFile);
     }
-    console.log("Selected file:", imageFile);
   };
 
   const handleFileChange = (event) => {
     // Access the selected file from the event
     const selectedFile = event.target.files[0];
     setImageFile(selectedFile);
-    if (selectedFile) {
-      // Read the selected file as a data URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        // Set the data URL as the image URL in state
-        setImageFile(e.target.result);
+ 
+       const formData = new FormData();
+      formData.append('file', selectedFile); // Replace 'file' with your form field name
+  
+      // Define your custom headers
+      const headers = {
+        'Content-Type': 'multipart/form-data', // Make sure to set the correct content type
+        Authorization: 'Bearer YOUR_ACCESS_TOKEN',
       };
-      reader.readAsDataURL(selectedFile);
-    }
-    console.log("Selected file:", imageFile);
+  
+      // Make an Axios request with FormData and custom headers
+     axios.post('http://asmrdb.hybridmediaworks.com/api/upload-image', formData, { headers })
+        .then(response => {
+          console.log('Upload successful:', response.data);
+        })
+        .catch(error => {
+          console.error('Error uploading file:', error);
+        });
   };
+
+  const handlePrompt = () => {
+    if (!imageFile) {
+      setImageError("Please upload an image");
+    } else {
+      setIsPrompt(true);
+      setImageError("")
+    }
+  };
+
+  const xApiKey = "b84e8750806d78328297224457ff2bff244c44cf";
+
+
+  
+
+const uploadFunction =async(img,seed)=>{
+
+  console.log("seed ",img)
+  try {
+    const response = await axios.get(
+      `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${img}&background.prompt=${prompt}&removeBackground=true&background.seed=${seed}`,
+        
+      {
+        headers: {
+         
+          Accept: "image/*",
+          "x-api-key": xApiKey,
+        },
+        responseType:'blob'
+      }
+    );
+   
+    // setResponseImage(dataUrl)
+    return response.data
+   
+  } catch (error) {
+    console.log("response.error ", error);
+  }
+}
+    
+         
+const uploadImage = async (image) => {
+  const storageRef = ref(storage, `images/${Date.now()}`);
+  const uploadTask = uploadBytesResumable(storageRef, image);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on('state_changed', (snapshot) => {
+      // Handle progress if needed
+    }, (error) => {
+      reject(error); // Handle errors
+    }, () => {
+      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        // URL of the uploaded image
+        console.log('Image URL:', downloadURL);
+        resolve(downloadURL);
+      }).catch((error) => {
+        reject(error); // Handle errors
+      });
+    });
+  });
+};
+const handleGenerateImge = async () => {
+  const seed = [
+    "55994449", "117879368", "48672244", "117879368"
+  ];
+
+  try {
+    const imageUrl = await uploadImage(imageFile);
+    console.log("image url ",imageUrl)
+    if (imageUrl) {
+      const dataUrls = await Promise.all(seed.map(s => uploadFunction(imageUrl,s)));
+      console.log("Responses:", dataUrls);
+     // setResponseImage(dataUrls);
+      setIsPrompt(false);
+    }
+  } catch (error) {
+    console.error("Error in handleGenerateImge:", error);
+  }
+};
+  
+
+  console.log("response.image ", responseImage);
 
   return (
     <div className="flex  h-full">
@@ -81,7 +173,7 @@ const ImageEditor = () => {
           </div>
           <div
             className="flex justify-center flex-col items-center mt-4 cursor-pointer"
-            onClick={() => setIsPrompt(!isPrompt)}
+            onClick={handlePrompt}
           >
             <span className="flex w-24 h-16 bg-[#F2F3F7]  rounded-lg  justify-center items-center">
               <svg
@@ -134,10 +226,12 @@ const ImageEditor = () => {
             ref={secondImage}
             onChange={handleSecondImgChange}
           />
+          
         </div>
+        
       </div>
       <div className="w-full h-full flex flex-col">
-        <div className="flex justify-center flex-col items-center w-full h-full py-8">
+        <div className="flex justify-center  flex-col items-center w-full h-full py-8">
           {!imageFile ? (
             <div className="bg-[#F2F3F7] w-[900px] h-[350px]  flex justify-center items-center rounded-3xl">
               <div className="w-[800px] h-[250px] border-dashed border-2 border-gray-500 rounded-2xl flex flex-col items-center justify-center">
@@ -156,7 +250,9 @@ const ImageEditor = () => {
                   + Select a photo
                 </button>
               </div>
+              
             </div>
+            
           ) : (
             <div>
               <div className="w-[800px] h-[400px]">
@@ -168,13 +264,24 @@ const ImageEditor = () => {
                     X
                   </span>
                 </div>
-                <div className="w-full h-full flex justify-center">
-                  <img src={imageFile} alt="" />
+                <div className="flex flex-col gap-y-2 w-[800px] h-[400px]">
+                  <div className="w-full h-full flex justify-center">
+                  <img src={URL.createObjectURL(imageFile)} alt="" />
                 </div>
+                {imageError && <p>{imageError}</p>}
+                {responseImage && 
+                <div className="flex items-center gap-x-2 my-5">
+                  {responseImage.map(item=>(
+                    <img src={URL.createObjectURL(item)} className="w-[200px] h-[200px]" />
+                  ))}
+                  
+                  </div>}
+                </div>
+                
               </div>
             </div>
           )}
-          {isPrompt && (
+                  {isPrompt && (
             <div className="flex justify-center mt-10">
               <div className="flex p-2 w-[500px] bg-[#F2F3F7] rounded-lg px-2">
                 <input
@@ -182,46 +289,52 @@ const ImageEditor = () => {
                   className="outline-none w-full px-2 bg-[#F2F3F7] "
                   placeholder="Enter prompt..."
                 />
-                <button className="bg-blue-500 text-white p-2.5 rounded-lg" onClick={generatePrompt}>
+                <button className="bg-blue-500 text-white p-2.5 rounded-lg" onClick={handleGenerateImge}>
                   Generate
                 </button>
               </div>
             </div>
           )}
         </div>
+        
       </div>
-      <div className="">
-        {/* {isPrompt && (
-        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex rounded-lg">
-            
-          <div className="relative p-8 bg-white w-200 h-200 m-auto">
-          <div className="my-4  flex flex-col justify-center items-center h-auto ">
-            <div className="flex flex-col">
-                <div className="w-full flex justify-end items-start">
-                <button
-              onClick={closeModal}
-              className="  hover:bg-blue-700 text-black font-semibold py-2 px-4 rounded w-fit"
-            >
-             X
-            </button>
-                </div>
-          
-               <label htmlFor="prompt">Prompt</label>
-                <span className="border-2 py-2 mt-2 rounded px-2">
+      {/* <div className="w-[200px] h-[200px]">
+        {isPrompt && (
+          <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex rounded-lg">
+            <div className="relative p-8 bg-white w-200 h-200 m-auto">
+              <div className="my-4  flex flex-col justify-center items-center h-auto ">
+                <div className="flex flex-col">
+                  <div className="w-full flex justify-end items-start">
+                    <button
+                      onClick={closeModal}
+                      className="  hover:bg-blue-700 text-black font-semibold py-2 px-4 rounded w-fit"
+                    >
+                      X
+                    </button>
+                  </div>
 
-                <input className="outline-none"  type="text" onChange={(e)=>setPrompt(e.target.value)} />
-                </span>
-               
-            </div>
-            <div className="mt-4">
-                <button className="px-5 py-2.5 bg-blue-500 text-white rounded-lg" onClick={generatePrompt}>Generate Image</button>
+                  <label htmlFor="prompt">Prompt</label>
+                  <span className="border-2 py-2 mt-2 rounded px-2">
+                    <input
+                      className="outline-none"
+                      type="text"
+                      onChange={(e) => setPrompt(e.target.value)}
+                    />
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <button
+                    className="px-5 py-2.5 bg-blue-500 text-white rounded-lg"
+                    onClick={handleGenerateImge}
+                  >
+                    Generate Image
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          
-          </div>
-        </div>
-      )} */}
-      </div>
+        )}
+      </div> */}
     </div>
   );
 };
