@@ -298,8 +298,9 @@ console.log(removeBgImg,'kkkk');
                   {imageError && <p>{imageError}</p>}
                   {responseImage && (
                     <div className="flex items-center gap-x-2 my-5 justify-center">
-                      {responseImage.map((item) => (
+                      {responseImage.map((item,index) => (
                         <img
+                          key={index}
                           src={URL.createObjectURL(item)}
                           className="w-[150px] h-[150px] rounded-lg"
                         />
