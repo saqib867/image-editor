@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import React, { useState, useRef } from "react";
+import ClipLoader from "react-spinners/ClipLoader";
 // import Modal from "react-modal";
 // import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 // import { storage } from "../firebase";
@@ -9,8 +10,10 @@ const ImageEditor = () => {
   const [secondImg, setSecondImg] = useState(null);
   const [imageError, setImageError] = useState(null);
   const [responseImage, setResponseImage] = useState([]);
+  const [removeBgImg, setRemoveBgImg] = useState(null);
   const [isPrompt, setIsPrompt] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const[isLoading,setIsLoading]=useState(false)
   const fileInputRef = useRef(null);
   const secondImage = useRef(null);
 
@@ -39,7 +42,7 @@ const ImageEditor = () => {
       reader.readAsDataURL(selectedFile);
     }
   };
-
+console.log(removeBgImg,'kkkk');
   const handleFileChange = (event) => {
     // Access the selected file from the event
     const selectedFile = event.target.files[0];
@@ -81,16 +84,77 @@ const ImageEditor = () => {
       console.log("response.error ", error);
     }
   };
+  const handleRemoveFunction = async (img) => {
+    console.log("seed ", img);
+    try {
+      const response = await axios.get(
+        `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${img}&removeBackground=true`,
 
- 
+        {
+          headers: {
+            Accept: "image/*",
+            "x-api-key": xApiKey,
+          },
+          responseType: "blob",
+          maxRedirects: 5,
+        }
+      );
+
+      // setResponseImage(dataUrl)
+      return response.data;
+    } catch (error) {
+      console.log("response.error ", error);
+    }
+  };
+
+ const handleRemoveImg= async()=>{
+    if(imageFile){
+        try {
+            const formData = new FormData();
+            formData.append("file", imageFile);
+            const response = await axios.post(
+              "http://asmrdb.hybridmediaworks.com/api/upload-image",
+              formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data", // do not forget this
+                },
+              }
+            );
+            console.log("response.data ", response.data);
+            if (response.data?.link) {
+              const dataUrls = await axios.get(
+                `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${response.data?.link}&removeBackground=true`,
+        
+                {
+                  headers: {
+                    Accept: "image/*",
+                    "x-api-key": xApiKey,
+                  },
+                  responseType: "blob",
+                  
+                }
+              );
+              console.log("Responses:uuuuuu", dataUrls);
+              setRemoveBgImg(dataUrls.data);
+              setIsPrompt(false);
+            }
+          } catch (error) {
+            console.error("Error in handleGenerateImge:", error);
+          }
+    }
+   
+
+ }
   const handleGenerateImge = async () => {
+    setIsLoading(true)
     const seed = ["55994449", "117879368", "48672244", "117879368"];
 
     try {
       const formData = new FormData();
       formData.append("file", imageFile);
       const response = await axios.post(
-        "https://asmrdb.hybridmediaworks.com/api/upload-image",
+        "http://asmrdb.hybridmediaworks.com/api/upload-image",
         formData,
         {
           headers: {
@@ -104,6 +168,7 @@ const ImageEditor = () => {
         console.log("Responses:", dataUrls);
        setResponseImage(dataUrls);
         setIsPrompt(false);
+        setIsLoading(false)
       }
     } catch (error) {
       console.error("Error in handleGenerateImge:", error);
@@ -117,7 +182,7 @@ const ImageEditor = () => {
       <div className="min-w-[300px] min-h-full border-r border-gray-400">
         <div className="flex flex-col p-4">
           <h1 className="text-center text-2xl font-semibold">Tools</h1>
-          <div className="flex justify-center flex-col items-center mt-4 cursor-pointer">
+          <div className="flex justify-center flex-col items-center mt-4 cursor-pointer" onClick={handleRemoveImg}>
             <span className="flex w-24 h-16 bg-[#F2F3F7]  rounded-lg  justify-center items-center">
               <svg
                 viewBox="0 0 24 24"
@@ -221,7 +286,7 @@ const ImageEditor = () => {
                 <div className="flex justify-end">
                   <span
                     className="cursor-pointer"
-                    onClick={() => setImageFile(null)}
+                    onClick={() => {setImageFile(null),setRemoveBgImg(null),setResponseImage([]) }}
                   >
                     X
                   </span>
@@ -241,6 +306,16 @@ const ImageEditor = () => {
                       ))}
                     </div>
                   )}
+                    {removeBgImg && (
+                    <div className="flex items-center gap-x-2 my-5 justify-center">
+                     
+                        <img
+                          src={URL.createObjectURL(removeBgImg)}
+                          className="w-[200px] h-[200px] rounded-lg"
+                        />
+                    
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -254,51 +329,27 @@ const ImageEditor = () => {
                   placeholder="Enter prompt..."
                   onChange={(e)=>setPrompt(e.target.value)}
                 />
-                <button className="bg-blue-500 text-white p-2.5 rounded-lg" onClick={handleGenerateImge}>
-                  Generate
+                <button className="bg-blue-500 flex text-white p-2.5 rounded-lg" onClick={handleGenerateImge}>
+                    <div>
+                    Generate
+                    </div>
+               <div></div>
+               <ClipLoader
+     
+     loading={isLoading}
+    color="#FFFFFF"
+     size={20}
+     aria-label="Loading Spinner"
+     data-testid="loader"
+   />
+                 
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
-      {/* <div className="w-[200px] h-[200px]">
-        {isPrompt && (
-          <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex rounded-lg">
-            <div className="relative p-8 bg-white w-200 h-200 m-auto">
-              <div className="my-4  flex flex-col justify-center items-center h-auto ">
-                <div className="flex flex-col">
-                  <div className="w-full flex justify-end items-start">
-                    <button
-                      onClick={closeModal}
-                      className="  hover:bg-blue-700 text-black font-semibold py-2 px-4 rounded w-fit"
-                    >
-                      X
-                    </button>
-                  </div>
-
-                  <label htmlFor="prompt">Prompt</label>
-                  <span className="border-2 py-2 mt-2 rounded px-2">
-                    <input
-                      className="outline-none"
-                      type="text"
-                      onChange={(e) => setPrompt(e.target.value)}
-                    />
-                  </span>
-                </div>
-                <div className="mt-4">
-                  <button
-                    className="px-5 py-2.5 bg-blue-500 text-white rounded-lg"
-                    onClick={handleGenerateImge}
-                  >
-                    Generate Image
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div> */}
+    
     </div>
   );
 };
