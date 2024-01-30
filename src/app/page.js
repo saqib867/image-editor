@@ -1,5 +1,5 @@
-'use client'
-import Image from "next/image";
+
+
 import ImageEditor from "./components/image-editor";
 
 export default function Home() {
