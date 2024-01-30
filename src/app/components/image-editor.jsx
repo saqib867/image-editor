@@ -32,15 +32,7 @@ const ImageEditor = () => {
     // Access the selected file from the event
     const selectedFile = event.target.files[0];
     setSecondImg(selectedFile);
-    if (selectedFile) {
-      // Read the selected file as a data URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        // Set the data URL as the image URL in state
-        setSecondImg(e.target.result);
-      };
-      reader.readAsDataURL(selectedFile);
-    }
+
   };
 console.log(removeBgImg,'kkkk');
   const handleFileChange = (event) => {
@@ -189,7 +181,7 @@ console.log(removeBgImg,'kkkk');
                 fill="currentColor"
                 aria-hidden="true"
                 role="img"
-                className="h-7 w-7 text-blue-500 text-content-accent"
+                class="h-7 w-7 text-blue-500 text-content-accent"
               >
                 <path
                   fill-rule="evenodd"
@@ -212,7 +204,7 @@ console.log(removeBgImg,'kkkk');
                 fill="currentColor"
                 aria-hidden="true"
                 role="img"
-                className="h-5 w-5 text-blue-500 text-content-accent group-hover:text-accent-400 group-focus-visible:text-accent-400 group-active:text-accent-600"
+                class="h-5 w-5 text-blue-500 text-content-accent group-hover:text-accent-400 group-focus-visible:text-accent-400 group-active:text-accent-600"
               >
                 <path
                   fill-rule="evenodd"
@@ -237,7 +229,7 @@ console.log(removeBgImg,'kkkk');
                 fill="currentColor"
                 aria-hidden="true"
                 role="img"
-                className="h-7 w-7 text-blue-500 text-content-accent"
+                class="h-7 w-7 text-blue-500 text-content-accent"
               >
                 <path
                   fill-rule="evenodd"
