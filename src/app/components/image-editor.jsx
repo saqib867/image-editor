@@ -234,8 +234,8 @@ const ImageEditor = () => {
       <div className="w-full h-full flex flex-col">
         <div className="flex justify-center  flex-col items-center w-full h-full py-8">
           {!imageFile ? (
-            <div className="bg-[#F2F3F7] w-[900px] h-[350px]  flex justify-center items-center rounded-3xl">
-              <div className="w-[800px] h-[250px] border-dashed border-2 border-gray-500 rounded-2xl flex flex-col items-center justify-center">
+            <div className="bg-[#F2F3F7] lg:w-[800px] w-[400px] lg:h-[350px] h-[300px] flex justify-center items-center rounded-3xl">
+              <div className="lg:w-[700px] w-[350px]  lg:h-[250px] h-[200px] border-dashed border-2 border-gray-500 rounded-2xl flex flex-col items-center justify-center">
                 <h1 className="text-3xl font-bold">Start From a Photo</h1>
                 <input
                   type="file"
@@ -254,7 +254,7 @@ const ImageEditor = () => {
             </div>
           ) : (
             <div>
-              <div className="w-[800px] h-[400px]">
+              <div className="lg:w-[800px] w-[400px] h-[400px]">
                 <div className="flex justify-end">
                   <span
                     className="cursor-pointer"
@@ -267,7 +267,7 @@ const ImageEditor = () => {
                     <IoMdClose />
                   </span>
                 </div>
-                <div className="flex flex-col gap-y-2 w-[800px] h-[400px] ">
+                <div className="flex flex-col gap-y-2 lg:w-[800px] w-[400px] h-[400px] ">
                   <div
                     className={`w-full h-full flex justify-center  ${
                       isBgRemoving && "opacity-50 "
@@ -294,12 +294,12 @@ const ImageEditor = () => {
                         />
                       ))}
                     </div>
-                  ) : (
+                  ) : isLoading && isPrompt &&(
                     <div className="flex items-center gap-x-2 my-5 justify-center">
                       {Array(4)
                         .fill()
                         .map((_, index) => (
-                          <div className="w-[200px] h-[200px]" key={index}>
+                          <div className="w-[150px] h-150px]" key={index}>
                             <Skeleton.Image
                             active
                               key={index}
