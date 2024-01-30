@@ -2,12 +2,13 @@
 import axios from "axios";
 import React, { useState, useRef } from "react";
 import { toast } from "react-toastify";
-import { Button, Image, Skeleton, Spin } from "antd";
+import { Button, Image as AntdImg, Skeleton, Spin } from "antd";
 import { LoadingOutlined } from '@ant-design/icons';
 import { IoMdClose } from "react-icons/io";
 // import Modal from "react-modal";
 // import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 // import { storage } from "../firebase";
+import ImglyBackgroundRemoval from "@imgly/background-removal";
 const ImageEditor = () => {
   const [imageFile, setImageFile] = useState(null);
   const [secondImg, setSecondImg] = useState(null);
@@ -18,12 +19,14 @@ const ImageEditor = () => {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isBgRemoving, setIsBgRemoving] = useState(false);
+  const [ImgError, setImgError] = useState('');
   const fileInputRef = useRef(null);
   const secondImage = useRef(null);
   const xApiKey = "b84e8750806d78328297224457ff2bff244c44cf";
   const handleButtonClick = () => {
     // Trigger the file input click event
     fileInputRef.current.click();
+    
   };
   const handleSecondImg = () => {
     // Trigger the file input click event
@@ -89,9 +92,43 @@ const ImageEditor = () => {
 
   const handleFileChange = (event) => {
     // Access the selected file from the event
+    setImageError('')
     const selectedFile = event.target.files[0];
-    setImageFile(selectedFile);
-  };
+
+ 
+    if (selectedFile.type !== 'image/jpeg') {
+      // alert('Please select a JPEG image.');
+      setImgError('Please select a JPEG format.')
+      event.target.value = ''; // Clear the file input
+      return;
+    }
+
+    // Use FileReader to read the image dimensions
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const img = new Image();
+      img.onload = function () {
+        const width = this.width;
+        const height = this.height;
+
+        // Check if the image dimensions are within the limit (0.25 megapixels)
+        if (width * height > 0.25 * 1000000) {
+        //  toast.error("Image size exceed from 250Kb pixel")
+        setImgError('Image size should below then  250kb ')
+          event.target.value = ''; // Clear the file input
+        } else {
+          // Image is valid, you can proceed with uploading or further processing
+          console.log('Valid image:', selectedFile);
+          setImageFile(selectedFile);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(selectedFile);
+   
+  }
+  
+
 
   const handlePrompt = () => {
     if (!imageFile) {
@@ -143,7 +180,7 @@ const ImageEditor = () => {
         console.log("response.data ", response.data);
         if (response.data?.link) {
           const dataUrls = await axios.get(
-            `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${response.data?.link}&removeBackground=true`,
+            `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${response.data?.link}&removeBackground=true&background.color=00000000`,
 
             {
               headers: {
@@ -200,6 +237,7 @@ const ImageEditor = () => {
 
   return (
     <div className="flex  h-full">
+     
       <div className="min-w-[300px] min-h-full border-r border-gray-400">
         <div className="flex flex-col p-4">
           <h1 className="text-center text-2xl font-semibold">Tools</h1>
@@ -303,10 +341,20 @@ const ImageEditor = () => {
                 >
                   + Select a photo
                 </button>
+                <div className="">
+                  <span className="text-sm mr-2">Max Size: 250kb</span>
+                  <span className="text-sm">Format: image/jpeg</span>
+                </div>
+                <div>
+                  {ImgError &&
+                  <span className="text-sm text-red-600">{ImgError}</span>
+                  }
+                </div>
               </div>
             </div>
           ) : (
             <div>
+       
               <div className="lg:w-[800px] w-[400px] py-4">
                 <div className="flex justify-end mr-4 ">
                   <span
@@ -335,7 +383,7 @@ const ImageEditor = () => {
                         />
                       }
                     >
-                    <Image
+                    <AntdImg
                       active={isBgRemoving}
                       loading={isBgRemoving}
                       preview={false}
@@ -352,14 +400,14 @@ const ImageEditor = () => {
               {responseImage.length != 0 ? (
                 <div className="flex items-center gap-x-2 my-5 justify-center">
                   {responseImage?.map((item, index) => (
-                    <Image
+                    <AntdImg
                       key={index}
                       preview={false}
                       className="cursor-pointer"
                       width={200}
                       src={URL.createObjectURL(item) || ""}
                       placeholder={
-                        <Image
+                        <AntdImg
                           preview={false}
                           src={URL.createObjectURL(item) || ""}
                           width={200}
