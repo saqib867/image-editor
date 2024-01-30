@@ -299,7 +299,7 @@ const ImageEditor = () => {
                       {Array(4)
                         .fill()
                         .map((_, index) => (
-                          <div className="w-[200px] h-[200px]">
+                          <div className="w-[200px] h-[200px]" key={index}>
                             <Skeleton.Image
                             active
                               key={index}
