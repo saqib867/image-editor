@@ -76,36 +76,14 @@ const ImageEditor = () => {
       console.log("response.error ", error);
     }
   };
-  const handleRemoveFunction = async (img) => {
-    console.log("seed ", img);
-    try {
-      const response = await axios.get(
-        `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${img}&removeBackground=true`,
-
-        {
-          headers: {
-            Accept: "image/*",
-            "x-api-key": xApiKey,
-          },
-          responseType: "blob",
-          maxRedirects: 5,
-        }
-      );
-
-      // setResponseImage(dataUrl)
-      return response.data;
-    } catch (error) {
-      console.log("response.error ", error);
-    }
-  };
-
+ 
  const handleRemoveImg= async()=>{
     if(imageFile){
         try {
             const formData = new FormData();
             formData.append("file", imageFile);
             const response = await axios.post(
-              "http://asmrdb.hybridmediaworks.com/api/upload-image",
+              "https://asmrdb.hybridmediaworks.com/api/upload-image",
               formData,
               {
                 headers: {
@@ -128,7 +106,7 @@ const ImageEditor = () => {
                 }
               );
               console.log("Responses:uuuuuu", dataUrls);
-              setRemoveBgImg(dataUrls.data);
+              setImageFile(dataUrls.data);
               setIsPrompt(false);
             }
           } catch (error) {
@@ -146,7 +124,7 @@ const ImageEditor = () => {
       const formData = new FormData();
       formData.append("file", imageFile);
       const response = await axios.post(
-        "http://asmrdb.hybridmediaworks.com/api/upload-image",
+        "https://asmrdb.hybridmediaworks.com/api/upload-image",
         formData,
         {
           headers: {
