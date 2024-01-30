@@ -34,7 +34,7 @@ const ImageEditor = () => {
     setSecondImg(selectedFile);
 
   };
-console.log(removeBgImg,'kkkk');
+
   const handleFileChange = (event) => {
     // Access the selected file from the event
     const selectedFile = event.target.files[0];
