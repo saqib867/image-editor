@@ -1,5 +1,6 @@
+'use client'
 
-
+import { use } from "react";
 import ImageEditor from "./components/image-editor";
 
 export default function Home() {
