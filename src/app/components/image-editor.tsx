@@ -189,7 +189,7 @@ console.log(removeBgImg,'kkkk');
                 fill="currentColor"
                 aria-hidden="true"
                 role="img"
-                class="h-7 w-7 text-blue-500 text-content-accent"
+                className="h-7 w-7 text-blue-500 text-content-accent"
               >
                 <path
                   fill-rule="evenodd"
@@ -212,7 +212,7 @@ console.log(removeBgImg,'kkkk');
                 fill="currentColor"
                 aria-hidden="true"
                 role="img"
-                class="h-5 w-5 text-blue-500 text-content-accent group-hover:text-accent-400 group-focus-visible:text-accent-400 group-active:text-accent-600"
+                className="h-5 w-5 text-blue-500 text-content-accent group-hover:text-accent-400 group-focus-visible:text-accent-400 group-active:text-accent-600"
               >
                 <path
                   fill-rule="evenodd"
@@ -237,7 +237,7 @@ console.log(removeBgImg,'kkkk');
                 fill="currentColor"
                 aria-hidden="true"
                 role="img"
-                class="h-7 w-7 text-blue-500 text-content-accent"
+                className="h-7 w-7 text-blue-500 text-content-accent"
               >
                 <path
                   fill-rule="evenodd"

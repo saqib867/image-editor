@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import ImageEditor from "./components/image-editor";
+import React from "react";
 
 export default function Home() {
   return (
