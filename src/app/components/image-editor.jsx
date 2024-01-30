@@ -3,6 +3,8 @@ import axios from "axios";
 import React, { useState, useRef } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
+import { Button, Image, Skeleton } from "antd";
+import { IoMdClose } from "react-icons/io";
 // import Modal from "react-modal";
 // import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 // import { storage } from "../firebase";
@@ -19,9 +21,6 @@ const ImageEditor = () => {
   const fileInputRef = useRef(null);
   const secondImage = useRef(null);
 
-  const closeModal = () => {
-    setIsPrompt(false);
-  };
   const handleButtonClick = () => {
     // Trigger the file input click event
     fileInputRef.current.click();
@@ -67,7 +66,6 @@ const ImageEditor = () => {
         }
       );
 
-      // setResponseImage(dataUrl)
       return response.data;
     } catch (error) {
       console.log("response.error ", error);
@@ -109,6 +107,7 @@ const ImageEditor = () => {
         }
       } catch (error) {
         console.error("Error in handleGenerateImge:", error);
+        setIsBgRemoving(false);
       }
     } else {
       toast.warning("Please Upload Image");
@@ -116,6 +115,7 @@ const ImageEditor = () => {
   };
   const handleGenerateImge = async () => {
     setIsLoading(true);
+    setResponseImage([]);
     const seed = ["55994449", "117879368", "48672244", "117879368"];
 
     try {
@@ -135,7 +135,7 @@ const ImageEditor = () => {
         const dataUrls = await Promise.all(
           seed.map((s) => uploadFunction(response.data?.link, s))
         );
-        console.log("Responses:", dataUrls);
+
         setResponseImage(dataUrls);
         setIsPrompt(false);
         setIsLoading(false);
@@ -145,16 +145,15 @@ const ImageEditor = () => {
     }
   };
 
-  console.log("response.image ", responseImage);
-
   return (
     <div className="flex  h-full">
       <div className="min-w-[300px] min-h-full border-r border-gray-400">
         <div className="flex flex-col p-4">
           <h1 className="text-center text-2xl font-semibold">Tools</h1>
-          <div
+          <button
             className="flex justify-center flex-col items-center mt-4 cursor-pointer"
             onClick={handleRemoveImg}
+            disabled={isBgRemoving}
           >
             <span className="flex w-24 h-16 bg-[#F2F3F7]  rounded-lg  justify-center items-center">
               <svg
@@ -174,7 +173,7 @@ const ImageEditor = () => {
             <span className="w-24 text-sm text-center mt-2">
               Remove Background
             </span>
-          </div>
+          </button>
           <div
             className="flex justify-center flex-col items-center mt-4 cursor-pointer"
             onClick={handlePrompt}
@@ -185,7 +184,7 @@ const ImageEditor = () => {
                 fill="currentColor"
                 aria-hidden="true"
                 role="img"
-                class="h-5 w-5 text-blue-500 text-content-accent group-hover:text-accent-400 group-focus-visible:text-accent-400 group-active:text-accent-600"
+                class="h-7 w-7 text-blue-500 text-content-accent group-hover:text-accent-400 group-focus-visible:text-accent-400 group-active:text-accent-600"
               >
                 <path
                   fill-rule="evenodd"
@@ -265,56 +264,51 @@ const ImageEditor = () => {
                         setResponseImage([]);
                     }}
                   >
-                    X
+                    <IoMdClose />
                   </span>
                 </div>
                 <div className="flex flex-col gap-y-2 w-[800px] h-[400px] ">
-                  {isBgRemoving ? (
-                    <div
-                      className={`w-full h-full flex justify-center  ${
-                        isBgRemoving && "opacity-50 "
-                      }`}
-                    >
-                      <ClipLoader
-                        loading={isLoading}
-                        color="#FFFFFF"
-                        size={20}
-                        aria-label="Loading Spinner"
-                        data-testid="loader"
-                      />
-                      <img src={URL.createObjectURL(imageFile)} alt="" />
-                    </div>
-                  ) : (
-                    <div
-                      className={`w-full h-full flex justify-center  ${
-                        isBgRemoving && "opacity-50 "
-                      }`}
-                    >
-                      <img src={URL.createObjectURL(imageFile)} alt="" />
-                    </div>
-                  )}
+                  <div
+                    className={`w-full h-full flex justify-center  ${
+                      isBgRemoving && "opacity-50 "
+                    }`}
+                  >
+                    <img src={URL.createObjectURL(imageFile)} alt="" />
+                  </div>
 
-                  {responseImage && (
+                  {responseImage.length != 0 ? (
                     <div className="flex items-center gap-x-2 my-5 justify-center">
-                      {responseImage.map((item, index) => (
-                        <img
+                      {responseImage?.map((item, index) => (
+                        <Image
                           key={index}
+                          width={200}
                           src={URL.createObjectURL(item) || ""}
-                          className="w-[150px] h-[150px] rounded-lg"
+                          placeholder={
+                            <Image
+                              preview={false}
+                              src={URL.createObjectURL(item) || ""}
+                              width={200}
+                              height={200}
+                            />
+                          }
                         />
                       ))}
                     </div>
-                  )}
-                  {/* {removeBgImg && (
+                  ) : (
                     <div className="flex items-center gap-x-2 my-5 justify-center">
-                     
-                        <img
-                          src={URL.createObjectURL(removeBgImg)}
-                          className="w-[200px] h-[200px] rounded-lg"
-                        />
-                    
+                      {Array(4)
+                        .fill()
+                        .map((_, index) => (
+                          <div className="w-[200px] h-[200px]">
+                            <Skeleton.Image
+                            active
+                              key={index}
+                              style={{ width: "150px", height: "150px", opacity:'0.5', }}
+                            />
+                          </div>
+                        ))}
                     </div>
-                  )} */}
+                  )}
                 </div>
               </div>
             </div>
@@ -328,7 +322,15 @@ const ImageEditor = () => {
                   placeholder="Enter prompt..."
                   onChange={(e) => setPrompt(e.target.value)}
                 />
-                <button
+                <Button
+                  type="primary"
+                  className="bg-blue-500"
+                  loading={isLoading}
+                  onClick={handleGenerateImge}
+                >
+                  Generate
+                </Button>
+                {/* <button
                   className="bg-blue-500 flex text-white p-2.5 rounded-lg"
                   onClick={handleGenerateImge}
                 >
@@ -341,7 +343,7 @@ const ImageEditor = () => {
                     aria-label="Loading Spinner"
                     data-testid="loader"
                   />
-                </button>
+                </button> */}
               </div>
             </div>
           )}
