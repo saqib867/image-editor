@@ -83,7 +83,7 @@ const ImageEditor = () => {
             const formData = new FormData();
             formData.append("file", imageFile);
             const response = await axios.post(
-              "https://asmrdb.hybridmediaworks.com/api/upload-image",
+              "http://asmrdb.hybridmediaworks.com/api/upload-image",
               formData,
               {
                 headers: {
@@ -124,7 +124,7 @@ const ImageEditor = () => {
       const formData = new FormData();
       formData.append("file", imageFile);
       const response = await axios.post(
-        "https://asmrdb.hybridmediaworks.com/api/upload-image",
+        "http://asmrdb.hybridmediaworks.com/api/upload-image",
         formData,
         {
           headers: {
@@ -271,13 +271,13 @@ const ImageEditor = () => {
                       {responseImage.map((item,index) => (
                         <img
                           key={index}
-                          src={URL.createObjectURL(item)}
+                          src={URL.createObjectURL(item) || ''}
                           className="w-[150px] h-[150px] rounded-lg"
                         />
                       ))}
                     </div>
                   )}
-                    {removeBgImg && (
+                    {/* {removeBgImg && (
                     <div className="flex items-center gap-x-2 my-5 justify-center">
                      
                         <img
@@ -286,7 +286,7 @@ const ImageEditor = () => {
                         />
                     
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
