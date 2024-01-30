@@ -83,7 +83,7 @@ const ImageEditor = () => {
             const formData = new FormData();
             formData.append("file", imageFile);
             const response = await axios.post(
-              "http://asmrdb.hybridmediaworks.com/api/upload-image",
+              "https://asmrdb.hybridmediaworks.com/api/upload-image",
               formData,
               {
                 headers: {
@@ -105,7 +105,7 @@ const ImageEditor = () => {
                   
                 }
               );
-              console.log("Responses:uuuuuu", dataUrls);
+           
               setImageFile(dataUrls.data);
               setIsPrompt(false);
             }
@@ -124,7 +124,7 @@ const ImageEditor = () => {
       const formData = new FormData();
       formData.append("file", imageFile);
       const response = await axios.post(
-        "http://asmrdb.hybridmediaworks.com/api/upload-image",
+        "https://asmrdb.hybridmediaworks.com/api/upload-image",
         formData,
         {
           headers: {
