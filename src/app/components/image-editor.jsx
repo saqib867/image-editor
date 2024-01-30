@@ -1,9 +1,9 @@
 "use client";
 import axios from "axios";
 import React, { useState, useRef } from "react";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-import { Button, Image, Skeleton } from "antd";
+import { Button, Image, Skeleton, Spin } from "antd";
+import { LoadingOutlined } from '@ant-design/icons';
 import { IoMdClose } from "react-icons/io";
 // import Modal from "react-modal";
 // import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
@@ -20,7 +20,7 @@ const ImageEditor = () => {
   const [isBgRemoving, setIsBgRemoving] = useState(false);
   const fileInputRef = useRef(null);
   const secondImage = useRef(null);
-
+  const xApiKey = "b84e8750806d78328297224457ff2bff244c44cf";
   const handleButtonClick = () => {
     // Trigger the file input click event
     fileInputRef.current.click();
@@ -29,10 +29,62 @@ const ImageEditor = () => {
     // Trigger the file input click event
     secondImage.current.click();
   };
-  const handleSecondImgChange = (event) => {
+  const handleSecondImgChange = async(event) => {
     // Access the selected file from the event
     const selectedFile = event.target.files[0];
     setSecondImg(selectedFile);
+    // setIsBgRemoving(true);
+    // setResponseImage([]);
+    // console.log(selectedFile);
+    // if (imageFile) {
+    //   try {
+    //     const formData = new FormData();
+    //     formData.append("file", imageFile);
+    //     const mainImgResponse = await axios.post(
+    //       "https://elev3n.hybridmediaworks.com/api/upload-image",
+    //       formData,
+    //       {
+    //         headers: {
+    //           "Content-Type": "multipart/form-data", // do not forget this
+    //         },
+    //       }
+    //     );
+    //     const secondFormData = new FormData();
+    //     secondFormData.append("file", selectedFile);
+    //     const secondImgResponse = await axios.post(
+    //       "https://elev3n.hybridmediaworks.com/api/upload-image",
+    //       formData,
+    //       {
+    //         headers: {
+    //           "Content-Type": "multipart/form-data", // do not forget this
+    //         },
+    //       }
+    //     );
+      
+    //     if (secondImgResponse.data?.link && mainImgResponse?.data?.link) {
+    //       const dataUrls = await axios.get(
+    //         `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${mainImgResponse?.data?.link}&removeBackground=true&background.imageUrl=${secondImgResponse.data?.link}`,
+
+    //         {
+    //           headers: {
+    //             Accept: "image/*",
+    //             "x-api-key": xApiKey,
+    //           },
+    //           responseType: "blob",
+    //         }
+    //       );
+
+    //       setImageFile(dataUrls.data);
+    //       setIsBgRemoving(false);
+    //       setIsPrompt(false);
+    //     }
+    //   } catch (error) {
+    //     console.error("Error in handleGenerateImge:", error);
+    //     setIsBgRemoving(false);
+    //   }
+    // } else {
+    //   toast.warning("Please Upload Image");
+    // }
   };
 
   const handleFileChange = (event) => {
@@ -49,7 +101,7 @@ const ImageEditor = () => {
     }
   };
 
-  const xApiKey = "b84e8750806d78328297224457ff2bff244c44cf";
+ 
 
   const uploadFunction = async (img, seed) => {
     try {
@@ -74,6 +126,7 @@ const ImageEditor = () => {
 
   const handleRemoveImg = async () => {
     setIsBgRemoving(true);
+    setResponseImage([]);
     if (imageFile) {
       try {
         const formData = new FormData();
@@ -231,8 +284,8 @@ const ImageEditor = () => {
           />
         </div>
       </div>
-      <div className="w-full h-full flex flex-col">
-        <div className="flex justify-center  flex-col items-center w-full h-full py-8">
+      <div className="w-full h-full flex flex-col ">
+        <div className="flex justify-center  flex-col items-center  w-full h-full py-8">
           {!imageFile ? (
             <div className="bg-[#F2F3F7] lg:w-[800px] w-[400px] lg:h-[350px] h-[300px] flex justify-center items-center rounded-3xl">
               <div className="lg:w-[700px] w-[350px]  lg:h-[250px] h-[200px] border-dashed border-2 border-gray-500 rounded-2xl flex flex-col items-center justify-center">
@@ -254,8 +307,8 @@ const ImageEditor = () => {
             </div>
           ) : (
             <div>
-              <div className="lg:w-[800px] w-[400px] h-[400px]">
-                <div className="flex justify-end">
+              <div className="lg:w-[800px] w-[400px] py-4">
+                <div className="flex justify-end mr-4 ">
                   <span
                     className="cursor-pointer"
                     onClick={() => {
@@ -267,50 +320,80 @@ const ImageEditor = () => {
                     <IoMdClose />
                   </span>
                 </div>
-                <div className="flex flex-col gap-y-2 lg:w-[800px] w-[400px] h-[400px] ">
+                <div className="flex flex-col gap-y-2 lg:w-[800px] w-[400px]  ">
                   <div
-                    className={`w-full h-full flex justify-center  ${
-                      isBgRemoving && "opacity-50 "
-                    }`}
+                    className={`w-full h-full flex justify-center  items-center `}
                   >
-                    <img src={URL.createObjectURL(imageFile)} alt="" />
-                  </div>
-
-                  {responseImage.length != 0 ? (
-                    <div className="flex items-center gap-x-2 my-5 justify-center">
-                      {responseImage?.map((item, index) => (
-                        <Image
-                          key={index}
-                          width={200}
-                          src={URL.createObjectURL(item) || ""}
-                          placeholder={
-                            <Image
-                              preview={false}
-                              src={URL.createObjectURL(item) || ""}
-                              width={200}
-                              height={200}
-                            />
-                          }
+                    <Spin
+                      spinning={isBgRemoving}
+                      indicator={
+                        <LoadingOutlined
+                          style={{
+                            fontSize: 35,
+                          }}
+                          spin
                         />
-                      ))}
-                    </div>
-                  ) : isLoading && isPrompt &&(
-                    <div className="flex items-center gap-x-2 my-5 justify-center">
-                      {Array(4)
-                        .fill()
-                        .map((_, index) => (
-                          <div className="w-[150px] h-150px]" key={index}>
-                            <Skeleton.Image
-                            active
-                              key={index}
-                              style={{ width: "150px", height: "150px", opacity:'0.5', }}
-                            />
-                          </div>
-                        ))}
-                    </div>
-                  )}
+                      }
+                    >
+                    <Image
+                      active={isBgRemoving}
+                      loading={isBgRemoving}
+                      preview={false}
+                      src={URL.createObjectURL(imageFile)}
+                      width={"300px"}
+                      height={"300px"}
+                      alt=""
+                      // style={{ display: isBgRemoving ? "none" : "block" }}
+                    />
+                     </Spin>
+                  </div>
                 </div>
               </div>
+              {responseImage.length != 0 ? (
+                <div className="flex items-center gap-x-2 my-5 justify-center">
+                  {responseImage?.map((item, index) => (
+                    <Image
+                      key={index}
+                      preview={false}
+                      className="cursor-pointer"
+                      width={200}
+                      src={URL.createObjectURL(item) || ""}
+                      placeholder={
+                        <Image
+                          preview={false}
+                          src={URL.createObjectURL(item) || ""}
+                          width={200}
+                          height={200}
+                        />
+                      }
+                      onClick={() => {
+                        setImageFile(item);
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                isLoading &&
+                isPrompt && (
+                  <div className="flex items-center gap-x-2 my-5 justify-center">
+                    {Array(4)
+                      .fill()
+                      .map((_, index) => (
+                        <div className="w-[150px] h-150px]" key={index}>
+                          <Skeleton.Image
+                            active
+                            key={index}
+                            style={{
+                              width: "150px",
+                              height: "150px",
+                              opacity: "0.5",
+                            }}
+                          />
+                        </div>
+                      ))}
+                  </div>
+                )
+              )}
             </div>
           )}
           {isPrompt && (
