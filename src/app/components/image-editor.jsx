@@ -93,7 +93,7 @@ const ImageEditor = () => {
 
   const handleFileChange = (event) => {
     // Access the selected file from the event
-    setImageError("");
+    setIsBgRemoving(false)
     const selectedFile = event.target.files[0];
     setImageFile(selectedFile);
 
@@ -396,6 +396,7 @@ const ImageEditor = () => {
                           active={isBgRemoving}
                           loading={isBgRemoving}
                           preview={false}
+                          className=" object-contain"
                           src={URL.createObjectURL(imageFile)}
                           width={"300px"}
                           height={"300px"}
@@ -408,7 +409,7 @@ const ImageEditor = () => {
                 </div>
              
               {responseImage != 0 && (
-                <div className="flex items-center gap-x-2 my-5 justify-center max-w-[700px] bg-[#F2F3F7] rounded-xl px-6 py-2">
+                <div className="flex items-center gap-x-2 my-5 h-[200px] justify-center max-w-[700px] bg-[#F2F3F7] rounded-xl px-6 py-2">
                   {responseImage?.map((item, index) =>
                     item ? (
                       <AntdImg
@@ -418,12 +419,15 @@ const ImageEditor = () => {
                           index === selectedIndex && "border-4 border-blue-500"
                         } `}
                         width={150}
+                        height={150}
                         src={URL.createObjectURL(item) || ""}
                         placeholder={
                           <AntdImg
                             preview={false}
+                            className="object-contain"
                             src={URL.createObjectURL(item) || ""}
                             width={150}
+                            height={150}
                           />
                         }
                         onClick={() => {
