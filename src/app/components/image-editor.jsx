@@ -423,12 +423,12 @@ const ImageEditor = () => {
                           }}
                         />
                       ) : (
-                        <div className="w-[150px] h-150px]" key={index}>
+                        <div className="w-[150px] h-110px]" key={index}>
                           <Skeleton.Image
                             active
                             style={{
                               width: "150px",
-                              height: "150px",
+                              height: "110px",
                               opacity: "0.5",
                             }}
                           />
