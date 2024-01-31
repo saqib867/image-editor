@@ -15,7 +15,7 @@ const ImageEditor = () => {
   const [imageError, setImageError] = useState(null);
   const [responseImage, setResponseImage] = useState([]);
   const [removeBgImg, setRemoveBgImg] = useState(null);
-  const[selectedIndex,setSelectedIndex]=useState(null)
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const [isPrompt, setIsPrompt] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -220,7 +220,7 @@ const ImageEditor = () => {
   };
   const handleGenerateImge = async () => {
     setIsLoading(true);
-    setResponseImage( Array.from({ length: 4 }, () => null));
+    setResponseImage(Array.from({ length: 4 }, () => null));
     const seed = ["55994449", "117879368", "48672244", "117879368"];
 
     try {
@@ -355,90 +355,97 @@ const ImageEditor = () => {
               </div>
             </div>
           ) : (
-            <div>
-              <div className="lg:w-[800px] w-[400px] py-4">
-                <div className="flex justify-end mr-4 ">
-                  <span
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setImageFile(null),
-                        setRemoveBgImg(null),
-                        setResponseImage([]);
-                    }}
-                  >
-                    <IoMdClose size={30}/>
-                  </span>
-                </div>
-                <div className="flex flex-col gap-y-2 lg:w-[800px] w-[400px]  ">
-                  <div
-                    className={`w-full h-full flex justify-center  items-center `}
-                  >
-                    <Spin
-                      spinning={isBgRemoving}
-                      indicator={
-                        <LoadingOutlined
-                          style={{
-                            fontSize: 35,
-                          }}
-                          spin
-                        />
-                      }
+            <div
+            className=" flex flex-col items-center top-0 left-0 right-0 bottom-0 bg-gradient-to-b  py-8 from-slate-50 to-transparent"
+            style={{
+              backgroundImage:
+                "radial-gradient(#eceaea  2px, transparent 3px)",
+              backgroundSize: "20px 20px",
+            }}
+          >
+              <div className="lg:w-[800px] w-[400px] py-4 ">
+              
+                  <div className="flex justify-end mr-4 ">
+                    <span
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setImageFile(null),
+                          setRemoveBgImg(null),
+                          setResponseImage([]);
+                      }}
                     >
-                      <AntdImg
-                        active={isBgRemoving}
-                        loading={isBgRemoving}
-                        preview={false}
-                        src={URL.createObjectURL(imageFile)}
-                        width={"300px"}
-                        height={"300px"}
-                        alt=""
-                        // style={{ display: isBgRemoving ? "none" : "block" }}
-                      />
-                    </Spin>
+                      <IoMdClose size={30} />
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-y-2 lg:w-[800px] w-[400px]  ">
+                    <div
+                      className={`w-full h-full flex justify-center  items-center `}
+                    >
+                      <Spin
+                        spinning={isBgRemoving}
+                        indicator={
+                          <LoadingOutlined
+                            style={{
+                              fontSize: 35,
+                            }}
+                            spin
+                          />
+                        }
+                      >
+                        <AntdImg
+                          active={isBgRemoving}
+                          loading={isBgRemoving}
+                          preview={false}
+                          src={URL.createObjectURL(imageFile)}
+                          width={"300px"}
+                          height={"300px"}
+                          alt=""
+                          // style={{ display: isBgRemoving ? "none" : "block" }}
+                        />
+                      </Spin>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {
-                responseImage!=0 && (
-                  <div className="flex items-center gap-x-2 my-5 justify-center bg-[#F2F3F7] rounded-xl px-8 py-2">
-                    {responseImage?.map((item, index) =>
-                      item ? (
-                        <AntdImg
-                          key={index}
-                          preview={false}
-                          className={`cursor-pointer ${index===selectedIndex && 'border-4 border-blue-500'} `}
-                          width={150}
-                          src={URL.createObjectURL(item) || ""}
-                          placeholder={
-                            <AntdImg
-                              preview={false}
-                              src={URL.createObjectURL(item) || ""}
-                              width={150}
-                             
-                            />
-                          }
-                          onClick={() => {
-                            setImageFile(item),
-                            setSelectedIndex(index);
+             
+              {responseImage != 0 && (
+                <div className="flex items-center gap-x-2 my-5 justify-center max-w-[700px] bg-[#F2F3F7] rounded-xl px-6 py-2">
+                  {responseImage?.map((item, index) =>
+                    item ? (
+                      <AntdImg
+                        key={index}
+                        preview={false}
+                        className={`cursor-pointer ${
+                          index === selectedIndex && "border-4 border-blue-500"
+                        } `}
+                        width={150}
+                        src={URL.createObjectURL(item) || ""}
+                        placeholder={
+                          <AntdImg
+                            preview={false}
+                            src={URL.createObjectURL(item) || ""}
+                            width={150}
+                          />
+                        }
+                        onClick={() => {
+                          setImageFile(item), setSelectedIndex(index);
+                        }}
+                      />
+                    ) : (
+                      <div className="w-[150px] h-110px]" key={index}>
+                        <Skeleton.Image
+                          active
+                          style={{
+                            width: "150px",
+                            height: "110px",
+                            opacity: "0.5",
                           }}
                         />
-                      ) : (
-                        <div className="w-[150px] h-110px]" key={index}>
-                          <Skeleton.Image
-                            active
-                            style={{
-                              width: "150px",
-                              height: "110px",
-                              opacity: "0.5",
-                            }}
-                          />
-                        </div>
-                      )
-                    )}
-                  </div>
-                )
-           
-              }
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+        
             </div>
           )}
           {isPrompt && (
@@ -458,7 +465,6 @@ const ImageEditor = () => {
                 >
                   Generate
                 </Button>
-       
               </div>
             </div>
           )}
