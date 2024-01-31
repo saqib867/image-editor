@@ -15,6 +15,7 @@ const ImageEditor = () => {
   const [imageError, setImageError] = useState(null);
   const [responseImage, setResponseImage] = useState([]);
   const [removeBgImg, setRemoveBgImg] = useState(null);
+  const[selectedIndex,setSelectedIndex]=useState(null)
   const [isPrompt, setIsPrompt] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -365,7 +366,7 @@ const ImageEditor = () => {
                         setResponseImage([]);
                     }}
                   >
-                    <IoMdClose />
+                    <IoMdClose size={30}/>
                   </span>
                 </div>
                 <div className="flex flex-col gap-y-2 lg:w-[800px] w-[400px]  ">
@@ -398,26 +399,27 @@ const ImageEditor = () => {
                 </div>
               </div>
               {
-                responseImage && (
+                responseImage!=0 && (
                   <div className="flex items-center gap-x-2 my-5 justify-center bg-[#F2F3F7] rounded-xl px-8 py-2">
                     {responseImage?.map((item, index) =>
                       item ? (
                         <AntdImg
                           key={index}
                           preview={false}
-                          className="cursor-pointer"
+                          className={`cursor-pointer ${index===selectedIndex && 'border-4 border-blue-500'} `}
                           width={150}
                           src={URL.createObjectURL(item) || ""}
                           placeholder={
                             <AntdImg
                               preview={false}
                               src={URL.createObjectURL(item) || ""}
-                              width={200}
-                              height={200}
+                              width={150}
+                             
                             />
                           }
                           onClick={() => {
-                            setImageFile(item);
+                            setImageFile(item),
+                            setSelectedIndex(index);
                           }}
                         />
                       ) : (
@@ -435,28 +437,7 @@ const ImageEditor = () => {
                     )}
                   </div>
                 )
-                // : (
-                //   isLoading &&
-                //   isPrompt && (
-                //     <div className="flex items-center gap-x-2 my-5 justify-center">
-                //       {Array(4)
-                //         .fill()
-                //         .map((_, index) => (
-                //           <div className="w-[150px] h-150px]" key={index}>
-                //             <Skeleton.Image
-                //               active
-                //               key={index}
-                //               style={{
-                //                 width: "150px",
-                //                 height: "150px",
-                //                 opacity: "0.5",
-                //               }}
-                //             />
-                //           </div>
-                //         ))}
-                //     </div>
-                //   )
-                // )
+           
               }
             </div>
           )}
@@ -477,20 +458,7 @@ const ImageEditor = () => {
                 >
                   Generate
                 </Button>
-                {/* <button
-                  className="bg-blue-500 flex text-white p-2.5 rounded-lg"
-                  onClick={handleGenerateImge}
-                >
-                  <div>Generate</div>
-                  <div></div>
-                  <ClipLoader
-                    loading={isLoading}
-                    color="#FFFFFF"
-                    size={20}
-                    aria-label="Loading Spinner"
-                    data-testid="loader"
-                  />
-                </button> */}
+       
               </div>
             </div>
           )}
