@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { Button, Image as AntdImg, Skeleton, Spin } from "antd";
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined } from "@ant-design/icons";
 import { IoMdClose } from "react-icons/io";
 // import Modal from "react-modal";
 // import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
@@ -19,20 +19,20 @@ const ImageEditor = () => {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isBgRemoving, setIsBgRemoving] = useState(false);
-  const [ImgError, setImgError] = useState('');
+  const [ImgError, setImgError] = useState("");
   const fileInputRef = useRef(null);
   const secondImage = useRef(null);
   const xApiKey = "b84e8750806d78328297224457ff2bff244c44cf";
+
   const handleButtonClick = () => {
     // Trigger the file input click event
     fileInputRef.current.click();
-    
   };
   const handleSecondImg = () => {
     // Trigger the file input click event
     secondImage.current.click();
   };
-  const handleSecondImgChange = async(event) => {
+  const handleSecondImgChange = async (event) => {
     // Access the selected file from the event
     const selectedFile = event.target.files[0];
     setSecondImg(selectedFile);
@@ -63,7 +63,7 @@ const ImageEditor = () => {
     //         },
     //       }
     //     );
-      
+
     //     if (secondImgResponse.data?.link && mainImgResponse?.data?.link) {
     //       const dataUrls = await axios.get(
     //         `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${mainImgResponse?.data?.link}&removeBackground=true&background.imageUrl=${secondImgResponse.data?.link}`,
@@ -92,43 +92,40 @@ const ImageEditor = () => {
 
   const handleFileChange = (event) => {
     // Access the selected file from the event
-    setImageError('')
+    setImageError("");
     const selectedFile = event.target.files[0];
+    setImageFile(selectedFile);
 
- 
-    if (selectedFile.type !== 'image/jpeg') {
-      // alert('Please select a JPEG image.');
-      setImgError('Please select a JPEG format.')
-      event.target.value = ''; // Clear the file input
-      return;
-    }
+    // if (selectedFile.type !== 'image/jpeg') {
+    //   // alert('Please select a JPEG image.');
+    //   setImgError('Please select a JPEG format.')
+    //   event.target.value = ''; // Clear the file input
+    //   return;
+    // }
 
-    // Use FileReader to read the image dimensions
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const img = new Image();
-      img.onload = function () {
-        const width = this.width;
-        const height = this.height;
+    // // Use FileReader to read the image dimensions
+    // const reader = new FileReader();
+    // reader.onload = function (e) {
+    //   const img = new Image();
+    //   img.onload = function () {
+    //     const width = this.width;
+    //     const height = this.height;
 
-        // Check if the image dimensions are within the limit (0.25 megapixels)
-        if (width * height > 0.25 * 1000000) {
-        //  toast.error("Image size exceed from 250Kb pixel")
-        setImgError('Image size should below then  250kb ')
-          event.target.value = ''; // Clear the file input
-        } else {
-          // Image is valid, you can proceed with uploading or further processing
-          console.log('Valid image:', selectedFile);
-          setImageFile(selectedFile);
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(selectedFile);
-   
-  }
-  
+    //     // Check if the image dimensions are within the limit (0.25 megapixels)
+    //     if (width * height > 0.25 * 1000000) {
+    //     //  toast.error("Image size exceed from 250Kb pixel")
+    //     setImgError('Image size should below then  250kb ')
+    //       event.target.value = ''; // Clear the file input
+    //     } else {
+    //       // Image is valid, you can proceed with uploading or further processing
+    //       console.log('Valid image:', selectedFile);
 
+    //     }
+    //   };
+    //   img.src = e.target.result;
+    // };
+    // reader.readAsDataURL(selectedFile);
+  };
 
   const handlePrompt = () => {
     if (!imageFile) {
@@ -138,63 +135,80 @@ const ImageEditor = () => {
     }
   };
 
- 
+  const uploadFunction = async (seed, index) => {
+    const formData = new FormData();
+    formData.append("prompt", prompt);
+    formData.append("imageFile", imageFile);
+    formData.append("seed", seed);
+    const options = {
+      method: "POST",
+      url: "https://beta-sdk.photoroom.com/v1/instant-backgrounds",
+      headers: {
+        "Content-Type":
+          "multipart/form-data; boundary=---011000010111000001101001",
+        Accept: "image/png, application/json",
+        "x-api-key": xApiKey,
+      },
+      responseType: "blob",
 
-  const uploadFunction = async (img, seed) => {
+      data: formData,
+    };
     try {
-      const response = await axios.get(
-        `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${img}&background.prompt=${prompt}&removeBackground=true&background.seed=${seed}`,
-
-        {
-          headers: {
-            Accept: "image/*",
-            "x-api-key": xApiKey,
-          },
-          responseType: "blob",
-          maxRedirects: 5,
-        }
-      );
-
-      return response.data;
+      const { data } = await axios.request(options);
+      console.log(data, "newResData");
+      responseImage[index] = data;
+      setResponseImage([...responseImage]);
+      return data;
     } catch (error) {
-      console.log("response.error ", error);
+      console.error(error);
     }
+    // try {
+    //   const response = await axios.get(
+    //     `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${img}&background.prompt=${prompt}&removeBackground=true&background.seed=${seed}`,
+
+    //     {
+    //       headers: {
+    //         Accept: "image/*",
+    //         "x-api-key": xApiKey,
+    //       },
+    //       responseType: "blob",
+    //       maxRedirects: 5,
+    //     }
+    //   );
+
+    //   return response.data;
+    // } catch (error) {
+    //   console.log("response.error ", error);
+    // }
   };
 
   const handleRemoveImg = async () => {
     setIsBgRemoving(true);
     setResponseImage([]);
     if (imageFile) {
+      const formData = new FormData();
+      formData.append("image_file", imageFile);
+      formData.append("format", "jpg");
+      formData.append("bg_color", "white");
+      formData.append("size", "preview");
+
+      const options = {
+        method: "POST",
+        url: "https://sdk.photoroom.com/v1/segment",
+        headers: {
+          "Content-Type":
+            "multipart/form-data; boundary=---011000010111000001101001",
+          Accept: "image/png, application/json",
+          "x-api-key": xApiKey,
+        },
+        responseType: "blob",
+        data: formData,
+      };
       try {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        const response = await axios.post(
-          "https://elev3n.hybridmediaworks.com/api/upload-image",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data", // do not forget this
-            },
-          }
-        );
-        console.log("response.data ", response.data);
-        if (response.data?.link) {
-          const dataUrls = await axios.get(
-            `https://beta-sdk.photoroom.com/v2/edit?imageUrl=${response.data?.link}&removeBackground=true&background.color=00000000`,
-
-            {
-              headers: {
-                Accept: "image/*",
-                "x-api-key": xApiKey,
-              },
-              responseType: "blob",
-            }
-          );
-
-          setImageFile(dataUrls.data);
-          setIsBgRemoving(false);
-          setIsPrompt(false);
-        }
+        const { data } = await axios.request(options);
+        setImageFile(data);
+        setIsBgRemoving(false);
+        setIsPrompt(false);
       } catch (error) {
         console.error("Error in handleGenerateImge:", error);
         setIsBgRemoving(false);
@@ -205,39 +219,35 @@ const ImageEditor = () => {
   };
   const handleGenerateImge = async () => {
     setIsLoading(true);
-    setResponseImage([]);
+    setResponseImage( Array.from({ length: 4 }, () => null));
     const seed = ["55994449", "117879368", "48672244", "117879368"];
 
     try {
       const formData = new FormData();
       formData.append("file", imageFile);
-      const response = await axios.post(
-        "https://elev3n.hybridmediaworks.com/api/upload-image",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // do not forget this
-          },
-        }
-      );
-      console.log("response.data ", response.data);
-      if (response.data?.link) {
-        const dataUrls = await Promise.all(
-          seed.map((s) => uploadFunction(response.data?.link, s))
-        );
+      // const response = await axios.post(
+      //   "https://elev3n.hybridmediaworks.com/api/upload-image",
+      //   formData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "multipart/form-data", // do not forget this
+      //     },
 
-        setResponseImage(dataUrls);
-        setIsPrompt(false);
-        setIsLoading(false);
-      }
+      //   }
+      // );
+
+      seed.map((s, index) => uploadFunction(s, index));
+
+      // setResponseImage(dataUrls);
+      setIsPrompt(false);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error in handleGenerateImge:", error);
     }
   };
-
+  console.log(responseImage, "imagess");
   return (
-    <div className="flex  h-full">
-     
+    <div className="flex  h-full z-10 relative">
       <div className="min-w-[300px] min-h-full border-r border-gray-400">
         <div className="flex flex-col p-4">
           <h1 className="text-center text-2xl font-semibold">Tools</h1>
@@ -341,20 +351,10 @@ const ImageEditor = () => {
                 >
                   + Select a photo
                 </button>
-                <div className="">
-                  <span className="text-sm mr-2">Max Size: 250kb</span>
-                  <span className="text-sm">Format: image/jpeg</span>
-                </div>
-                <div>
-                  {ImgError &&
-                  <span className="text-sm text-red-600">{ImgError}</span>
-                  }
-                </div>
               </div>
             </div>
           ) : (
             <div>
-       
               <div className="lg:w-[800px] w-[400px] py-4">
                 <div className="flex justify-end mr-4 ">
                   <span
@@ -383,54 +383,47 @@ const ImageEditor = () => {
                         />
                       }
                     >
-                    <AntdImg
-                      active={isBgRemoving}
-                      loading={isBgRemoving}
-                      preview={false}
-                      src={URL.createObjectURL(imageFile)}
-                      width={"300px"}
-                      height={"300px"}
-                      alt=""
-                      // style={{ display: isBgRemoving ? "none" : "block" }}
-                    />
-                     </Spin>
+                      <AntdImg
+                        active={isBgRemoving}
+                        loading={isBgRemoving}
+                        preview={false}
+                        src={URL.createObjectURL(imageFile)}
+                        width={"300px"}
+                        height={"300px"}
+                        alt=""
+                        // style={{ display: isBgRemoving ? "none" : "block" }}
+                      />
+                    </Spin>
                   </div>
                 </div>
               </div>
-              {responseImage.length != 0 ? (
-                <div className="flex items-center gap-x-2 my-5 justify-center">
-                  {responseImage?.map((item, index) => (
-                    <AntdImg
-                      key={index}
-                      preview={false}
-                      className="cursor-pointer"
-                      width={200}
-                      src={URL.createObjectURL(item) || ""}
-                      placeholder={
+              {
+                responseImage && (
+                  <div className="flex items-center gap-x-2 my-5 justify-center bg-[#F2F3F7] rounded-xl px-8 py-2">
+                    {responseImage?.map((item, index) =>
+                      item ? (
                         <AntdImg
+                          key={index}
                           preview={false}
+                          className="cursor-pointer"
+                          width={150}
                           src={URL.createObjectURL(item) || ""}
-                          width={200}
-                          height={200}
+                          placeholder={
+                            <AntdImg
+                              preview={false}
+                              src={URL.createObjectURL(item) || ""}
+                              width={200}
+                              height={200}
+                            />
+                          }
+                          onClick={() => {
+                            setImageFile(item);
+                          }}
                         />
-                      }
-                      onClick={() => {
-                        setImageFile(item);
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : (
-                isLoading &&
-                isPrompt && (
-                  <div className="flex items-center gap-x-2 my-5 justify-center">
-                    {Array(4)
-                      .fill()
-                      .map((_, index) => (
+                      ) : (
                         <div className="w-[150px] h-150px]" key={index}>
                           <Skeleton.Image
                             active
-                            key={index}
                             style={{
                               width: "150px",
                               height: "150px",
@@ -438,10 +431,33 @@ const ImageEditor = () => {
                             }}
                           />
                         </div>
-                      ))}
+                      )
+                    )}
                   </div>
                 )
-              )}
+                // : (
+                //   isLoading &&
+                //   isPrompt && (
+                //     <div className="flex items-center gap-x-2 my-5 justify-center">
+                //       {Array(4)
+                //         .fill()
+                //         .map((_, index) => (
+                //           <div className="w-[150px] h-150px]" key={index}>
+                //             <Skeleton.Image
+                //               active
+                //               key={index}
+                //               style={{
+                //                 width: "150px",
+                //                 height: "150px",
+                //                 opacity: "0.5",
+                //               }}
+                //             />
+                //           </div>
+                //         ))}
+                //     </div>
+                //   )
+                // )
+              }
             </div>
           )}
           {isPrompt && (
